@@ -1,8 +1,3 @@
 openzeppelin/=lib/core/lib/openzeppelin-contracts/contracts/
 lens/=lib/core/contracts/
-madfi-protocol/=lib/madfi-protocol-public/contracts/
-openzeppelin-contracts-upgradeable/=lib/core/lib/seadrop/lib/openzeppelin-contracts-upgradeable/contracts/
-solady/=lib/core/lib/solady/src/
-layerzero/=lib/solidity-examples/contracts/
 contracts/libraries/=lib/core/contracts/libraries/
-solmate/=lib/solmate/src/

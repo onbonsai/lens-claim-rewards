@@ -5,6 +5,3 @@
 	path = lib/core
 	url = https://github.com/lens-protocol/core
 	branch = master
-[submodule "lib/solmate"]
-	path = lib/solmate
-	url = https://github.com/transmissions11/solmate
