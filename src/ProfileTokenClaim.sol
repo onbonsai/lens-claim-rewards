@@ -43,17 +43,19 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
     /**
      * @notice Allows the contract owner to start a new claim epoch by supplying tokens
      * NOTE: requires caller to approve the transfer of `totalAmount`
+     * @param startingProfileId The floor of profileId number able to claim
      * @param totalAmount The total amount of tokens for this rewards epoch
      * @param claimAmount The per profile claimable amount
      */
-    function newEpoch(uint256 totalAmount, uint256 claimAmount) external onlyOwner {
+    function newEpoch(uint256 startingProfileId, uint256 totalAmount, uint256 claimAmount) external onlyOwner {
         token.safeTransferFrom(msg.sender, address(this), totalAmount);
 
         epoch++;
         ClaimAmountData memory data = ClaimAmountData({
             total: totalAmount,
             available: totalAmount,
-            perProfile: claimAmount
+            perProfile: claimAmount,
+            startingProfileId: startingProfileId
         });
         claimAmounts[epoch] = data;
 
@@ -68,6 +70,8 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
     function claimTokens(uint16 _epoch, uint256 profileId) external {
         ClaimAmountData storage data = claimAmounts[_epoch];
         address profileOwner = IERC721(address(hub)).ownerOf(profileId);
+
+        if (data.total == 0 || profileId < data.startingProfileId) revert NotAllowed();
 
         // revert if not profile owner or delegated executor
         if (msg.sender != profileOwner && !hub.isDelegatedExecutorApproved(profileId, msg.sender)) {
