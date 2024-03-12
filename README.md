@@ -1,6 +1,6 @@
 # lens-claim-rewards
 
-Simple contract to enable token claims. Lens Profiles can directly or via the [profile manager](https://docs.lens.xyz/docs/profile-manager) can claim once per epoch.
+Simple contract to enable token claims. Lens Profiles can claim directly or via the [profile manager](https://docs.lens.xyz/docs/profile-manager) can claim once per epoch.
 
 ## Usage
 
