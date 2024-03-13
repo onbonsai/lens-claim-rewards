@@ -49,27 +49,33 @@ contract ProfileTokenClaimTest is LensUtils {
         // reverts when the epoch does not exist
         vm.expectRevert(IProfileTokenClaim.NotAllowed.selector);
         vm.prank(user.owner);
-        tokenClaim.claimTokens(firstEpoch, user.profileId);
+        tokenClaim.claimTokens(user.profileId);
 
         _newEpoch(startingProfileId);
 
         // reverts when not called by the profile owner or manager
         vm.expectRevert(IProfileTokenClaim.ExecutorInvalid.selector);
-        tokenClaim.claimTokens(firstEpoch, user.profileId);
+        tokenClaim.claimTokens(user.profileId);
+
+        // view functions returns positive amount
+        assertEq(tokenClaim.claimableAmount(user.profileId), claimAmount);
 
         // allows user to claim directly
         vm.prank(user.owner);
-        tokenClaim.claimTokens(firstEpoch, user.profileId);
+        tokenClaim.claimTokens(user.profileId);
         assertEq(token.balanceOf(user.owner), claimAmount);
 
         // does not allow them to claim again
         vm.expectRevert(IProfileTokenClaim.AlreadyClaimed.selector);
         vm.prank(user.owner);
-        tokenClaim.claimTokens(firstEpoch, user.profileId);
+        tokenClaim.claimTokens(user.profileId);
+
+        // view functions returns 0
+        assertEq(tokenClaim.claimableAmount(user.profileId), 0);
 
         // allows user to claim via profile manager
         vm.prank(defaultTransactionExecutor);
-        tokenClaim.claimTokens(firstEpoch, user2.profileId);
+        tokenClaim.claimTokens(user2.profileId);
         assertEq(token.balanceOf(user2.owner), claimAmount);
 
         // does not allow user3 to claim when rewards are depleted
@@ -77,18 +83,21 @@ contract ProfileTokenClaimTest is LensUtils {
         assertEq(available, 0);
         vm.expectRevert(IProfileTokenClaim.EpochEnded.selector);
         vm.prank(user3.owner);
-        tokenClaim.claimTokens(firstEpoch, user3.profileId);
+        tokenClaim.claimTokens(user3.profileId);
 
         _newEpoch(3); // set new epoch claimable by profileId >= 3
 
         // it reverts with user trying to claim (profileId: 2)
         vm.expectRevert(IProfileTokenClaim.NotAllowed.selector);
         vm.prank(user.owner);
-        tokenClaim.claimTokens(firstEpoch + 1, user.profileId);
+        tokenClaim.claimTokens(user.profileId);
+
+        // view functions returns 0
+        assertEq(tokenClaim.claimableAmount(user.profileId), 0);
 
         // it allows user2 to claim (profileId: 3)
         vm.prank(user2.owner);
-        tokenClaim.claimTokens(firstEpoch + 1, user2.profileId);
+        tokenClaim.claimTokens(user2.profileId);
         assertEq(token.balanceOf(user2.owner), claimAmount * 2);
     }
 

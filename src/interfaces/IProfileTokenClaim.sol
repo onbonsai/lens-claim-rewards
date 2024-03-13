@@ -18,5 +18,6 @@ interface IProfileTokenClaim {
     error ExecutorInvalid();
     error NotAllowed();
 
-    function claimTokens(uint16 epoch, uint256 profileId) external;
+    function claimTokens(uint256 profileId) external;
+    function claimableAmount(uint256 profileId) external view returns (uint256);
 }
