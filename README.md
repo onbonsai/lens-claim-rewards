@@ -14,7 +14,7 @@ Simple contract to enable token claims. Lens Profiles can claim directly or via 
 
 | Contract Name | Mumbai | Polygon |
 | ------------- | ------------- | ------------- |
-| `ProfileTokenClaim`  | `0xaA8f262C37c07E99a7BFE2645D066f4eE490805C` | `0x` |
+| `ProfileTokenClaim`  | `0xb9E1af09483125D1426F6A19eeC046A320FE2054` | `0x` |
 
 Set your `.env` by copying `.env.template`
 
