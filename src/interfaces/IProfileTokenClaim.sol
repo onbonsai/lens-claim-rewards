@@ -8,11 +8,13 @@ interface IProfileTokenClaim {
         uint256 available; // decreasing on each claim
         uint256 perProfile; // claimable per profile
         uint256 startingProfileId; // users with profileId >= can claim
+        uint256 endingProfileId; // users with profileId < can claim
     }
 
     event NewEpoch(uint16 epoch, ClaimAmountData data);
 
     error NoZeroAddress();
+    error InvalidInput();
     error AlreadyClaimed();
     error EpochEnded();
     error ExecutorInvalid();

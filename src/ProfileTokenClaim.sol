@@ -45,9 +45,11 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
      * NOTE: requires caller to approve the transfer of `totalAmount`
      * @param startingProfileId The floor of profileId number able to claim
      * @param totalAmount The total amount of tokens for this rewards epoch
-     * @param claimAmount The per profile claimable amount
+     * @param profileCount The number of profiles that can claim
      */
-    function newEpoch(uint256 startingProfileId, uint256 totalAmount, uint256 claimAmount) external onlyOwner {
+    function newEpoch(uint256 startingProfileId, uint256 totalAmount, uint256 profileCount) external onlyOwner {
+        if (totalAmount == 0 || profileCount == 0) revert InvalidInput();
+
         token.safeTransferFrom(msg.sender, address(this), totalAmount);
 
         totalAmount += claimAmounts[epoch].available; // unclaimed rewards roll over
@@ -56,8 +58,9 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
         ClaimAmountData memory data = ClaimAmountData({
             total: totalAmount,
             available: totalAmount,
-            perProfile: claimAmount,
-            startingProfileId: startingProfileId
+            perProfile: totalAmount / profileCount,
+            startingProfileId: startingProfileId,
+            endingProfileId: startingProfileId + profileCount
         });
         claimAmounts[epoch] = data;
 
@@ -70,7 +73,11 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
      * @return uint256 The claimable reward amount
      */
     function claimableAmount(uint256 profileId) external view returns (uint256) {
-        if (claims[epoch][profileId] || profileId < claimAmounts[epoch].startingProfileId) return 0;
+        if (
+            claims[epoch][profileId] ||
+                profileId < claimAmounts[epoch].startingProfileId ||
+                profileId > claimAmounts[epoch].endingProfileId
+        ) return 0;
 
         return claimAmounts[epoch].perProfile;
     }
@@ -83,12 +90,13 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
         ClaimAmountData storage data = claimAmounts[epoch];
         address profileOwner = IERC721(address(hub)).ownerOf(profileId);
 
-        if (data.total == 0 || profileId < data.startingProfileId) revert NotAllowed();
+        // revert if not existing or profile id out of range
+        if (data.total == 0 || profileId < data.startingProfileId || profileId > data.endingProfileId)
+            revert NotAllowed();
 
         // revert if not profile owner or delegated executor
-        if (msg.sender != profileOwner && !hub.isDelegatedExecutorApproved(profileId, msg.sender)) {
+        if (msg.sender != profileOwner && !hub.isDelegatedExecutorApproved(profileId, msg.sender))
             revert ExecutorInvalid();
-        }
 
         if (claims[epoch][profileId]) revert AlreadyClaimed();
         if (data.available == 0) revert EpochEnded();
