@@ -94,10 +94,9 @@ contract ClaimTokens is Script {
 
         vm.startBroadcast(privateKey);
 
-        uint16 epoch = 1;
-        uint256 profileId = 140; // TODO: test/carlosbeltran
+        uint256 profileId = 140; // test/carlosbeltran
 
-        ProfileTokenClaim(tokenClaim).claimTokens(epoch, profileId);
+        ProfileTokenClaim(tokenClaim).claimTokens(profileId);
 
         vm.stopBroadcast();
     }

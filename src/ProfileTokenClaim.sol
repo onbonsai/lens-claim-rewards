@@ -50,6 +50,8 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
     function newEpoch(uint256 startingProfileId, uint256 totalAmount, uint256 claimAmount) external onlyOwner {
         token.safeTransferFrom(msg.sender, address(this), totalAmount);
 
+        totalAmount += claimAmounts[epoch].available; // unclaimed rewards roll over
+
         epoch++;
         ClaimAmountData memory data = ClaimAmountData({
             total: totalAmount,
@@ -63,12 +65,22 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
     }
 
     /**
-     * @notice Allows a profile to claim tokens - once - for the given `epoch`, while there are tokens available
-     * @param _epoch The epoch to claim rewards for
+     * @notice Returns the claimable reward amount for the given `profileId` in current epoch
+     * @param profileId The profile id to check rewards for
+     * @return uint256 The claimable reward amount
+     */
+    function claimableAmount(uint256 profileId) external view returns (uint256) {
+        if (claims[epoch][profileId] || profileId < claimAmounts[epoch].startingProfileId) return 0;
+
+        return claimAmounts[epoch].perProfile;
+    }
+
+    /**
+     * @notice Allows a profile to claim tokens - once - for the current epoch, while there are tokens available
      * @param profileId The profile id to claim tokens for
      */
-    function claimTokens(uint16 _epoch, uint256 profileId) external {
-        ClaimAmountData storage data = claimAmounts[_epoch];
+    function claimTokens(uint256 profileId) external {
+        ClaimAmountData storage data = claimAmounts[epoch];
         address profileOwner = IERC721(address(hub)).ownerOf(profileId);
 
         if (data.total == 0 || profileId < data.startingProfileId) revert NotAllowed();
@@ -78,11 +90,11 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
             revert ExecutorInvalid();
         }
 
-        if (claims[_epoch][profileId]) revert AlreadyClaimed();
+        if (claims[epoch][profileId]) revert AlreadyClaimed();
         if (data.available == 0) revert EpochEnded();
 
         data.available -= data.perProfile;
-        claims[_epoch][profileId] = true;
+        claims[epoch][profileId] = true;
 
         token.safeTransfer(profileOwner, data.perProfile);
     }
