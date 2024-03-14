@@ -142,7 +142,7 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
      * @param profileId The profile id to claim tokens for
      * @param claimScoreBbps Percent of the `_merkleClaimAmountMax` this profile can claim (in bps)
      */
-    function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint16 claimScoreBbps) public {
+    function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint16 claimScoreBbps) external {
         address profileOwner = IERC721(address(hub)).ownerOf(profileId);
 
         // revert if not profile owner or delegated executor

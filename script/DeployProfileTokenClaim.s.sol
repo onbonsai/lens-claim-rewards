@@ -43,9 +43,9 @@ contract DeployProfileTokenClaim is Script {
             merkleRoot = bytes32(0);
             merkleClaimTotal = 0;
             merkleClaimAmountMax = 0;
-        } else if (block.chainid == 8001) {
+        } else if (block.chainid == 80001) {
             merkleRoot = 0x196684a1becab6512d4f338ccd86278623f5bb09d9a12d670dfc1e55b0bbfcd7;
-            merkleClaimTotal = 200 ether;
+            merkleClaimTotal = 400 ether;
             merkleClaimAmountMax = 100 ether;
         }
         IERC20(token).approve(address(tokenClaim), merkleClaimTotal);
@@ -71,7 +71,7 @@ contract NewEpoch is Script {
             revert("unsupported chain");
         } else if (block.chainid == 80001) {
             // polygon mumbai testnet config
-            tokenClaim = 0x1378F4E4024af3EE3dAEb11b62fC426B718014B9;
+            tokenClaim = 0x9213BE0AC5fbbCBF690b52D8c1b0Af2c4B776eb8;
         } else {
             revert("unsupported chain");
         }
@@ -105,7 +105,7 @@ contract ClaimTokens is Script {
             revert("unsupported chain");
         } else if (block.chainid == 80001) {
             // polygon mumbai testnet config
-            tokenClaim = 0x1378F4E4024af3EE3dAEb11b62fC426B718014B9;
+            tokenClaim = 0x9213BE0AC5fbbCBF690b52D8c1b0Af2c4B776eb8;
         } else {
             revert("unsupported chain");
         }

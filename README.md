@@ -16,7 +16,7 @@ ABI can be found at [abi/ProfileClaimToken.json](abi/ProfileClaimToken.json)
 
 | Contract Name | Mumbai | Polygon |
 | ------------- | ------------- | ------------- |
-| `ProfileTokenClaim`  | `0x1378F4E4024af3EE3dAEb11b62fC426B718014B9` | `0x` |
+| `ProfileTokenClaim`  | `0x9213BE0AC5fbbCBF690b52D8c1b0Af2c4B776eb8` | `0x` |
 
 Set your `.env` by copying `.env.template`
 
@@ -53,4 +53,16 @@ function claimTokens(uint256 profileId) external;
 Run the script:
 ```bash
 source .env && forge script script/DeployProfileTokenClaim.s.sol:ClaimTokens --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
+```
+
+### Claim tokens with proof
+
+We enable a one-off claiming via merkle proofs. Data is to be pre-generated offchain and you can then set a CSV in the root directory (see `merkle_claim_tree_input.csv`) to generate a merkle tree via
+```bash
+npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_input.csv" --jsonOutputFile="merkle_claim_tree_output.json"
+```
+
+The root can then be uploaded to the contract - only once - via `#setClaimProof` and transfering in the token amount. Proof data should be stored in a db, indexed by `profileId` and sent along with the transaction to claim via:
+```solidity
+function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint16 claimScoreBbps) external;
 ```

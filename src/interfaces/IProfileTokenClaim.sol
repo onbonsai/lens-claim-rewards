@@ -24,5 +24,6 @@ interface IProfileTokenClaim {
     error InvalidProof();
 
     function claimTokens(uint256 profileId) external;
+    function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint16 claimScoreBbps) external;
     function claimableAmount(uint256 profileId) external view returns (uint256);
 }
