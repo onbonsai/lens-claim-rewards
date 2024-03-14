@@ -31,7 +31,25 @@ contract DeployProfileTokenClaim is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // deploy
-        new ProfileTokenClaim(hub, moduleRegistry, token);
+        ProfileTokenClaim tokenClaim = new ProfileTokenClaim(hub, moduleRegistry, token);
+
+        // proof claims
+        bytes32 merkleRoot;
+        uint256 merkleClaimTotal;
+        uint256 merkleClaimAmountMax;
+
+        if (block.chainid == 137) {
+            // TODO
+            merkleRoot = bytes32(0);
+            merkleClaimTotal = 0;
+            merkleClaimAmountMax = 0;
+        } else if (block.chainid == 8001) {
+            merkleRoot = bytes32(0);
+            merkleClaimTotal = 200 ether;
+            merkleClaimAmountMax = 100 ether;
+        }
+        IERC20(token).approve(address(tokenClaim), merkleClaimTotal);
+        tokenClaim.setClaimProof(merkleClaimTotal, merkleClaimAmountMax, merkleRoot);
 
         vm.stopBroadcast();
     }

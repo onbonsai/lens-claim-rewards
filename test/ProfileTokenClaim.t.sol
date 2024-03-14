@@ -103,8 +103,36 @@ contract ProfileTokenClaimTest is LensUtils {
         assertEq(token.balanceOf(user2.owner), claimAmount * 2);
     }
 
+    function testSetClaimProof() public {
+        bytes32 root = keccak256(abi.encodePacked(uint256(1)));
+        // it reverts when not called by the owner
+        vm.expectRevert(); // Ownable
+        vm.prank(user.owner);
+        tokenClaim.setClaimProof(1, 1, root);
+
+        // it reverts when the token transfer was not approved
+        vm.expectRevert(); // SafeTransfer
+        tokenClaim.setClaimProof(1, 1, root);
+
+        // sets storage
+        uint256 total = 10 ether;
+        _setClaimProof(total, 1 ether, root);
+
+        assertEq(tokenClaim.merkleClaimAmountTotal(), total);
+
+        // it reverts when trying to override a previous merkle claim root
+        token.approve(address(tokenClaim), total);
+        vm.expectRevert(IProfileTokenClaim.NotAllowed.selector);
+        tokenClaim.setClaimProof(total, 1 ether, root);
+    }
+
     function _newEpoch(uint256 _startingProfileId) internal {
         token.approve(address(tokenClaim), totalAmount);
         tokenClaim.newEpoch(_startingProfileId, totalAmount, profileCount);
+    }
+
+    function _setClaimProof(uint256 total, uint256 maxPer, bytes32 _merkleRoot) internal {
+        token.approve(address(tokenClaim), total);
+        tokenClaim.setClaimProof(total, maxPer, _merkleRoot);
     }
 }

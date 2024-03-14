@@ -12,6 +12,8 @@ interface IProfileTokenClaim {
     }
 
     event NewEpoch(uint16 epoch, ClaimAmountData data);
+    event Claimed(uint16 epoch, uint256 profileId, uint256 amount);
+    event ClaimedWithProof(uint256 profileId, uint256 amount);
 
     error NoZeroAddress();
     error InvalidInput();
@@ -19,6 +21,7 @@ interface IProfileTokenClaim {
     error EpochEnded();
     error ExecutorInvalid();
     error NotAllowed();
+    error InvalidProof();
 
     function claimTokens(uint256 profileId) external;
     function claimableAmount(uint256 profileId) external view returns (uint256);

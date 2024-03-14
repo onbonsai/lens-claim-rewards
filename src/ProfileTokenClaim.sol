@@ -8,6 +8,7 @@ import {IERC721} from "openzeppelin/token/ERC721/IERC721.sol";
 import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
 import {SafeERC20} from "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "openzeppelin/access/Ownable.sol";
+import {MerkleProofLib} from "solmate/utils/MerkleProofLib.sol";
 import "./interfaces/IProfileTokenClaim.sol";
 
 /**
@@ -17,12 +18,18 @@ import "./interfaces/IProfileTokenClaim.sol";
 contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
     using SafeERC20 for IERC20;
 
+    uint256 public merkleClaimAmountTotal;
     uint16 public epoch; // allow multiple claim seasons; 1-based
     IERC20 public immutable token; // Lens whitelisted currency
     ILensProtocol public immutable hub; // Lens profile owners
 
     mapping (uint16 epoch => mapping (uint256 profileId => bool claimed)) public claims;
     mapping (uint16 epoch => ClaimAmountData) public claimAmounts;
+    mapping (uint256 profileId => bool claimed) public proofClaims;
+
+    uint16 internal constant BPS_MAX = 10000;
+    bytes32 internal _merkleRoot; // for one-time claiming rewards via proof
+    uint256 internal _merkleClaimAmountMax; // the max amount a user could claim via proof
 
     /**
     * @dev contract constructor
@@ -38,6 +45,26 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
 
         token = IERC20(_token);
         hub = ILensProtocol(_hub);
+    }
+
+    /**
+    * @notice Allows the contract owner to set the claim via proof data, for one-off claim
+    * @param _merkleClaimAmountTotal: Merkle claim amount total (to transfer in)
+    * @param __merkleRoot: Merkle proof root for a one-off claim
+    * @param __merkleClaimAmountMax: Max amount a profile can claim via proof; proof data contains % in bps
+    */
+    function setClaimProof(
+        uint256 _merkleClaimAmountTotal,
+        uint256 __merkleClaimAmountMax,
+        bytes32 __merkleRoot
+    ) external onlyOwner {
+        if (_merkleRoot != bytes32(0)) revert NotAllowed(); // cannot override previous
+
+        merkleClaimAmountTotal = _merkleClaimAmountTotal;
+        _merkleRoot = __merkleRoot;
+        _merkleClaimAmountMax = __merkleClaimAmountMax;
+
+        token.safeTransferFrom(msg.sender, address(this), _merkleClaimAmountTotal);
     }
 
     /**
@@ -105,5 +132,35 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
         claims[epoch][profileId] = true;
 
         token.safeTransfer(profileOwner, data.perProfile);
+
+        emit Claimed(epoch, profileId, data.perProfile);
+    }
+
+    /**
+     * @notice Allows a profile to claim tokens via a proof, only once, up to `_merkleClaimAmountMax`
+     * @param proof Merkle proof of the claim
+     * @param profileId The profile id to claim tokens for
+     * @param claimScoreBbps Percent of the `_merkleClaimAmountMax` this profile can claim (in bps)
+     */
+    function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint16 claimScoreBbps) public {
+        address profileOwner = IERC721(address(hub)).ownerOf(profileId);
+
+        // revert if not profile owner or delegated executor
+        if (msg.sender != profileOwner && !hub.isDelegatedExecutorApproved(profileId, msg.sender))
+            revert ExecutorInvalid();
+
+        if (proofClaims[profileId]) revert AlreadyClaimed();
+        if (!MerkleProofLib.verify(
+            proof,
+            _merkleRoot,
+            keccak256(abi.encodePacked(profileId, claimScoreBbps))
+        )) revert InvalidProof();
+
+        uint256 amount = (claimScoreBbps * _merkleClaimAmountMax) / BPS_MAX;
+
+        proofClaims[profileId] = true;
+        token.safeTransfer(profileOwner, amount);
+
+        emit ClaimedWithProof(profileId, amount);
     }
 }

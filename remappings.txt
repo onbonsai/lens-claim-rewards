@@ -1,3 +1,4 @@
 openzeppelin/=lib/core/lib/openzeppelin-contracts/contracts/
 lens/=lib/core/contracts/
 contracts/libraries/=lib/core/contracts/libraries/
+solmate/=lib/solmate/src/
