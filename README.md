@@ -66,3 +66,8 @@ The root can then be uploaded to the contract - only once - via `#setClaimProof`
 ```solidity
 function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint16 claimScoreBbps) external;
 ```
+
+You can check if a profile has claimed their one-off via the getter:
+```solidity
+function proofClaims(uint256 profileId) external view returns (bool claimed);
+```
