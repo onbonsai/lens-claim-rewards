@@ -11,12 +11,14 @@ contract ProfileTokenClaimTest is LensUtils {
     uint16 firstEpoch = 1;
     uint256 totalAmount = 2 ether;
     uint256 claimAmount = 1 ether;
-    uint256 startingProfileId = 0;
+    uint256 profileCount = 2; // only 2 can claim
+    uint256 startingProfileId;
 
     function setUp() public override {
         super.setUp();
 
         tokenClaim = new ProfileTokenClaim(address(hub), address(moduleRegistry), address(token));
+        startingProfileId = user.profileId;
     }
 
     function testConstructor() public {
@@ -27,11 +29,11 @@ contract ProfileTokenClaimTest is LensUtils {
         // reverts when not called by the owner
         vm.expectRevert(); // Ownable
         vm.prank(user.owner);
-        tokenClaim.newEpoch(1, 1, 0);
+        tokenClaim.newEpoch(1, 1, profileCount);
 
         // reverts when the caller does not approve the transfer
         vm.expectRevert(); // SafeTransfer
-        tokenClaim.newEpoch(1, 1, 0);
+        tokenClaim.newEpoch(1, 1, profileCount);
 
         _newEpoch(startingProfileId);
 
@@ -40,7 +42,7 @@ contract ProfileTokenClaimTest is LensUtils {
 
         // it updates storage
         assertEq(tokenClaim.epoch(), firstEpoch);
-        (uint256 total,, uint256 perProfile,) = tokenClaim.claimAmounts(firstEpoch);
+        (uint256 total,, uint256 perProfile,,) = tokenClaim.claimAmounts(firstEpoch);
         assertEq(total, totalAmount);
         assertEq(perProfile, claimAmount);
     }
@@ -79,7 +81,7 @@ contract ProfileTokenClaimTest is LensUtils {
         assertEq(token.balanceOf(user2.owner), claimAmount);
 
         // does not allow user3 to claim when rewards are depleted
-        (,uint256 available,,) = tokenClaim.claimAmounts(firstEpoch);
+        (,uint256 available,,,) = tokenClaim.claimAmounts(firstEpoch);
         assertEq(available, 0);
         vm.expectRevert(IProfileTokenClaim.EpochEnded.selector);
         vm.prank(user3.owner);
@@ -103,6 +105,6 @@ contract ProfileTokenClaimTest is LensUtils {
 
     function _newEpoch(uint256 _startingProfileId) internal {
         token.approve(address(tokenClaim), totalAmount);
-        tokenClaim.newEpoch(_startingProfileId, totalAmount, claimAmount);
+        tokenClaim.newEpoch(_startingProfileId, totalAmount, profileCount);
     }
 }

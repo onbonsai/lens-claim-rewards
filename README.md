@@ -12,9 +12,11 @@ Simple contract to enable token claims. Lens Profiles can claim directly or via 
 
 ## Deployments
 
+ABI can be found at [abi/ProfileClaimToken.json](abi/ProfileClaimToken.json)
+
 | Contract Name | Mumbai | Polygon |
 | ------------- | ------------- | ------------- |
-| `ProfileTokenClaim`  | `0xb9E1af09483125D1426F6A19eeC046A320FE2054` | `0x` |
+| `ProfileTokenClaim`  | `0x1378F4E4024af3EE3dAEb11b62fC426B718014B9` | `0x` |
 
 Set your `.env` by copying `.env.template`
 
