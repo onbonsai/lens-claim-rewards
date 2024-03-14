@@ -53,7 +53,7 @@ contract NewEpoch is Script {
             revert("unsupported chain");
         } else if (block.chainid == 80001) {
             // polygon mumbai testnet config
-            tokenClaim = 0xb9E1af09483125D1426F6A19eeC046A320FE2054;
+            tokenClaim = 0x1378F4E4024af3EE3dAEb11b62fC426B718014B9;
         } else {
             revert("unsupported chain");
         }
@@ -87,7 +87,7 @@ contract ClaimTokens is Script {
             revert("unsupported chain");
         } else if (block.chainid == 80001) {
             // polygon mumbai testnet config
-            tokenClaim = 0xb9E1af09483125D1426F6A19eeC046A320FE2054;
+            tokenClaim = 0x1378F4E4024af3EE3dAEb11b62fC426B718014B9;
         } else {
             revert("unsupported chain");
         }
