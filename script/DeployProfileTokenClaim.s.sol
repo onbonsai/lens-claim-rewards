@@ -44,7 +44,7 @@ contract DeployProfileTokenClaim is Script {
             merkleClaimTotal = 0;
             merkleClaimAmountMax = 0;
         } else if (block.chainid == 8001) {
-            merkleRoot = bytes32(0);
+            merkleRoot = 0x196684a1becab6512d4f338ccd86278623f5bb09d9a12d670dfc1e55b0bbfcd7;
             merkleClaimTotal = 200 ether;
             merkleClaimAmountMax = 100 ether;
         }
