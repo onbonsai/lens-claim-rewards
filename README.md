@@ -30,7 +30,7 @@ source .env && forge script script/DeployProfileTokenClaim.s.sol:DeployProfileTo
 
 The contract owner can call this function to set a new rewards epoch and transfer in the rewards token
 ```solidity
-function newEpoch(uint256 startingProfileId, uint256 totalAmount, uint256 claimAmount) external;
+function newEpoch(uint256 startingProfileId, uint256 totalAmount, uint256 profileCount) external;
 ```
 
 Run the script:
@@ -38,11 +38,16 @@ Run the script:
 source .env && forge script script/DeployProfileTokenClaim.s.sol:NewEpoch --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
 ```
 
+### Check claimable amount
+```solidity
+function claimableAmount(uint256 profileId) external view returns (uint256);
+```
+
 ### Claim tokens
 
 Anyone with a profileId >= the `startingProfileId` for the given `epoch` can claim their rewards - directly or through their Lens Profile Manager.
 ```solidity
-function claimTokens(uint16 _epoch, uint256 profileId) external;
+function claimTokens(uint256 profileId) external;
 ```
 
 Run the script:
