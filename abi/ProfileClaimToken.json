@@ -74,6 +74,29 @@
     },
     {
         "type": "function",
+        "name": "claimTokensWithProof",
+        "inputs": [
+            {
+                "name": "proof",
+                "type": "bytes32[]",
+                "internalType": "bytes32[]"
+            },
+            {
+                "name": "profileId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "claimScoreBbps",
+                "type": "uint16",
+                "internalType": "uint16"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
         "name": "claimableAmount",
         "inputs": [
             {
@@ -143,6 +166,19 @@
     },
     {
         "type": "function",
+        "name": "merkleClaimAmountTotal",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
         "name": "newEpoch",
         "inputs": [
             {
@@ -179,8 +215,50 @@
     },
     {
         "type": "function",
+        "name": "proofClaims",
+        "inputs": [
+            {
+                "name": "profileId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "claimed",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
         "name": "renounceOwnership",
         "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "setClaimProof",
+        "inputs": [
+            {
+                "name": "_merkleClaimAmountTotal",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "__merkleClaimAmountMax",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "__merkleRoot",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
         "outputs": [],
         "stateMutability": "nonpayable"
     },
@@ -209,6 +287,50 @@
         ],
         "outputs": [],
         "stateMutability": "nonpayable"
+    },
+    {
+        "type": "event",
+        "name": "Claimed",
+        "inputs": [
+            {
+                "name": "epoch",
+                "type": "uint16",
+                "indexed": false,
+                "internalType": "uint16"
+            },
+            {
+                "name": "profileId",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "ClaimedWithProof",
+        "inputs": [
+            {
+                "name": "profileId",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
     },
     {
         "type": "event",
@@ -293,6 +415,11 @@
     {
         "type": "error",
         "name": "InvalidInput",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidProof",
         "inputs": []
     },
     {
