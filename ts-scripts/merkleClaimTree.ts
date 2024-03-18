@@ -6,7 +6,7 @@ import csv from "csv-parser";
 import { keccak256, toBuffer } from "ethereumjs-util";
 import { MerkleTree } from "merkletreejs";
 import { parseUnits, solidityPack } from "ethers/lib/utils";
-import { utils } from "ethers";
+import { convertIntToHexLensId } from "./utils";
 
 interface CsvRow {
   profileId: string;
@@ -18,7 +18,7 @@ const MERKLE_CLAIM_AMOUNT_MAX = 10_000; // 10k bonsai
 /*
 USAGE: put your csv in the root dir and run
 
-npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_input.csv" --jsonOutputFile="merkle_claim_tree_output.json"
+npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="testnet_merkle_claim_tree_input.csv" --jsonOutputFile="testnet_merkle_claim_tree_output.json"
 */
 (async () => {
   const {
@@ -55,14 +55,12 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
 
       const userData = {};
       csvData.forEach((row, index) => {
-        const keys = Object.keys(row);
-        const address = row[keys[0]]; // for some reason row.address doesn't work
-        userData[address] = {
+        const profileId = convertIntToHexLensId(row.profileId);
+        userData[profileId] = {
           proof: tree.getHexProof(leaves[index]),
-          // leaf: "0x" + leaves[index].toString("hex"),
-          profileId: row.profileId,
+          profileId,
           claimScoreBbps: row.claimScoreBbps,
-          claimableAmount: parseUnits(((row.claimScoreBbps * MERKLE_CLAIM_AMOUNT_MAX) / 100).toString(), 18).toString()
+          claimableAmount: parseUnits((MERKLE_CLAIM_AMOUNT_MAX * (row.claimScoreBbps / 10000)).toString(), 18).toString()
         };
       });
 
