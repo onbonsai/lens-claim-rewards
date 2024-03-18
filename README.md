@@ -16,7 +16,7 @@ ABI can be found at [abi/ProfileClaimToken.json](abi/ProfileClaimToken.json)
 
 | Contract Name | Mumbai | Polygon |
 | ------------- | ------------- | ------------- |
-| `ProfileTokenClaim`  | `0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea` | `0x` |
+| `ProfileTokenClaim`  | `0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea` | `0xC14b0FBB2059698Cf28Fff318D0C40e24eC07fC8` |
 
 Set your `.env` by copying `.env.template`
 

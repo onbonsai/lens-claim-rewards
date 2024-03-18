@@ -33,23 +33,23 @@ contract DeployProfileTokenClaim is Script {
         // deploy
         ProfileTokenClaim tokenClaim = new ProfileTokenClaim(hub, moduleRegistry, token);
 
-        // proof claims
-        bytes32 merkleRoot;
-        uint256 merkleClaimTotal;
-        uint256 merkleClaimAmountMax;
+        // // proof claims
+        // bytes32 merkleRoot;
+        // uint256 merkleClaimTotal;
+        // uint256 merkleClaimAmountMax;
 
-        if (block.chainid == 137) {
-            // TODO
-            merkleRoot = bytes32(0);
-            merkleClaimTotal = 0;
-            merkleClaimAmountMax = 0;
-        } else if (block.chainid == 80001) {
-            merkleRoot = 0x356b96bfc7a22623a7b44e8ea2a43a611a8dca215089fc8575fb061ce1984b8c;
-            merkleClaimTotal = 45_000 ether;
-            merkleClaimAmountMax = 10_000 ether;
-        }
-        IERC20(token).approve(address(tokenClaim), merkleClaimTotal);
-        tokenClaim.setClaimProof(merkleClaimTotal, merkleClaimAmountMax, merkleRoot);
+        // if (block.chainid == 137) {
+        //     // TODO
+        //     merkleRoot = bytes32(0);
+        //     merkleClaimTotal = 0;
+        //     merkleClaimAmountMax = 0;
+        // } else if (block.chainid == 80001) {
+        //     merkleRoot = 0x356b96bfc7a22623a7b44e8ea2a43a611a8dca215089fc8575fb061ce1984b8c;
+        //     merkleClaimTotal = 45_000 ether;
+        //     merkleClaimAmountMax = 10_000 ether;
+        // }
+        // IERC20(token).approve(address(tokenClaim), merkleClaimTotal);
+        // tokenClaim.setClaimProof(merkleClaimTotal, merkleClaimAmountMax, merkleRoot);
 
         vm.stopBroadcast();
     }
@@ -78,13 +78,13 @@ contract NewEpoch is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // rewards; 1000 $bonsai, 10 $bonsai per claim
+        // rewards; 1000 $bonsai, 100 profiles
         uint256 totalAmount = 1000 ether;
-        uint256 claimAmount = 10 ether;
+        uint256 totalCount = 100;
         uint256 startingTokenId = 0; // TODO
 
         IERC20(token).approve(tokenClaim, totalAmount);
-        ProfileTokenClaim(tokenClaim).newEpoch(startingTokenId, totalAmount, claimAmount);
+        ProfileTokenClaim(tokenClaim).newEpoch(startingTokenId, totalAmount, totalCount);
 
         vm.stopBroadcast();
     }
