@@ -18,7 +18,8 @@ import "./interfaces/IProfileTokenClaim.sol";
 contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
     using SafeERC20 for IERC20;
 
-    uint256 public merkleClaimAmountTotal;
+    uint256 public merkleClaimAmountTotal; // remaining amount for merkle claims
+    uint256 public merkleClaimEndAt; // the time limit for merkle claims, after which contract owner can withdraw
     uint16 public epoch; // allow multiple claim seasons; 1-based
     IERC20 public immutable token; // Lens whitelisted currency
     ILensProtocol public immutable hub; // Lens profile owners
@@ -61,10 +62,23 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
         if (_merkleRoot != bytes32(0)) revert NotAllowed(); // cannot override previous
 
         merkleClaimAmountTotal = _merkleClaimAmountTotal;
+        merkleClaimEndAt = block.timestamp + 364 days;
         _merkleRoot = __merkleRoot;
         _merkleClaimAmountMax = __merkleClaimAmountMax;
 
         token.safeTransferFrom(msg.sender, address(this), _merkleClaimAmountTotal);
+    }
+
+    /**
+     * @notice Allows the contract owner to withdraw any unclaimed tokens from merkle claims, past `merkleClaimEndAt`
+     */
+    function withdrawUnclaimedMerkleAmount() external onlyOwner {
+        if (block.timestamp < merkleClaimEndAt) revert NotAllowed();
+
+        uint256 amount = merkleClaimAmountTotal;
+        merkleClaimAmountTotal = 0;
+
+        token.safeTransfer(msg.sender, amount);
     }
 
     /**
@@ -159,6 +173,7 @@ contract ProfileTokenClaim is Ownable, IProfileTokenClaim {
         uint256 amount = (claimScoreBbps * _merkleClaimAmountMax) / BPS_MAX;
 
         proofClaims[profileId] = true;
+        merkleClaimAmountTotal -= amount;
         token.safeTransfer(profileOwner, amount);
 
         emit ClaimedWithProof(profileId, amount);

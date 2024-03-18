@@ -192,6 +192,20 @@ contract ProfileTokenClaimTest is LensUtils {
         tokenClaim.claimTokensWithProof(proof2, user2.profileId, claimScoreBbps2);
         assertEq(token.balanceOf(user2.owner), per * claimScoreBbps2 / 10000);
         assertEq(tokenClaim.proofClaims(user2.profileId), true);
+
+        // #withdrawUnclaimedMerkleAmount
+
+        // it reverts when calling before the end at
+        vm.expectRevert(IProfileTokenClaim.NotAllowed.selector);
+        tokenClaim.withdrawUnclaimedMerkleAmount();
+
+        // it withdraws the remaining merkle claim amount
+        uint256 amount = tokenClaim.merkleClaimAmountTotal();
+        uint256 balanceBefore = token.balanceOf(address(this));
+        vm.warp(tokenClaim.merkleClaimEndAt());
+        tokenClaim.withdrawUnclaimedMerkleAmount();
+
+        assertEq(token.balanceOf(address(this)), balanceBefore + amount);
     }
 
     function _newEpoch(uint256 _startingProfileId) internal {
