@@ -16,11 +16,12 @@ ABI can be found at [abi/ProfileClaimToken.json](abi/ProfileClaimToken.json)
 
 | Contract Name | Mumbai | Polygon |
 | ------------- | ------------- | ------------- |
-| `ProfileTokenClaim`  | `0x9213BE0AC5fbbCBF690b52D8c1b0Af2c4B776eb8` | `0x` |
+| `ProfileTokenClaim`  | `0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea` | `0x` |
 
 Set your `.env` by copying `.env.template`
 
 ### Deploy the contract
+NOTE: This also sets the merkle root for the one-off claiming - see the script for the config
 
 ```bash
 source .env && forge script script/DeployProfileTokenClaim.s.sol:DeployProfileTokenClaim --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
@@ -70,4 +71,9 @@ function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint1
 You can check if a profile has claimed their one-off via the getter:
 ```solidity
 function proofClaims(uint256 profileId) external view returns (bool claimed);
+```
+
+Run the script:
+```bash
+source .env && forge script script/DeployProfileTokenClaim.s.sol:ClaimTokensWithProof --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
 ```

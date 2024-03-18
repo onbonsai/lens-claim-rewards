@@ -44,9 +44,9 @@ contract DeployProfileTokenClaim is Script {
             merkleClaimTotal = 0;
             merkleClaimAmountMax = 0;
         } else if (block.chainid == 80001) {
-            merkleRoot = 0x196684a1becab6512d4f338ccd86278623f5bb09d9a12d670dfc1e55b0bbfcd7;
-            merkleClaimTotal = 400 ether;
-            merkleClaimAmountMax = 100 ether;
+            merkleRoot = 0x356b96bfc7a22623a7b44e8ea2a43a611a8dca215089fc8575fb061ce1984b8c;
+            merkleClaimTotal = 45_000 ether;
+            merkleClaimAmountMax = 10_000 ether;
         }
         IERC20(token).approve(address(tokenClaim), merkleClaimTotal);
         tokenClaim.setClaimProof(merkleClaimTotal, merkleClaimAmountMax, merkleRoot);
@@ -71,7 +71,7 @@ contract NewEpoch is Script {
             revert("unsupported chain");
         } else if (block.chainid == 80001) {
             // polygon mumbai testnet config
-            tokenClaim = 0x9213BE0AC5fbbCBF690b52D8c1b0Af2c4B776eb8;
+            tokenClaim = 0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea;
         } else {
             revert("unsupported chain");
         }
@@ -105,7 +105,7 @@ contract ClaimTokens is Script {
             revert("unsupported chain");
         } else if (block.chainid == 80001) {
             // polygon mumbai testnet config
-            tokenClaim = 0x9213BE0AC5fbbCBF690b52D8c1b0Af2c4B776eb8;
+            tokenClaim = 0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea;
         } else {
             revert("unsupported chain");
         }
@@ -115,6 +115,52 @@ contract ClaimTokens is Script {
         uint256 profileId = 140; // test/carlosbeltran
 
         ProfileTokenClaim(tokenClaim).claimTokens(profileId);
+
+        vm.stopBroadcast();
+    }
+}
+
+/**
+ * @dev this script attempts to claim tokens with a merkle proof
+ */
+contract ClaimTokensWithProof is Script {
+    function run() public {
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+
+        address tokenClaim;
+
+        if (block.chainid == 137) {
+            // polygon mainnet config
+            // TODO
+            revert("unsupported chain");
+        } else if (block.chainid == 80001) {
+            // polygon mumbai testnet config
+            tokenClaim = 0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea;
+        } else {
+            revert("unsupported chain");
+        }
+
+        // "0x8c": {
+        //     "proof": [
+        //         "0x8308e716b8f6e08300f76f019ded6f5ccdc8f75a5cf2d5d7c02afc4ddeeacb3b",
+        //         "0xd9c511c04ab6ef49683b04df399278db420f76722c2b14bbee1811ce1bfc8d15",
+        //         "0xb554f56f3dd0e3f431f90d2d3f1f56a10fcb91ebf0f037b524499c6244787835"
+        //     ],
+        //     "profileId": "0x8c",
+        //     "claimScoreBbps": "10000",
+        //     "claimableAmount": "10000000000000000000000"
+        // },
+
+        vm.startBroadcast(privateKey);
+
+        uint256 profileId = 140; // test/carlosbeltran
+        bytes32[] memory proof = new bytes32[](3);
+        proof[0] = 0x8308e716b8f6e08300f76f019ded6f5ccdc8f75a5cf2d5d7c02afc4ddeeacb3b;
+        proof[1] = 0xd9c511c04ab6ef49683b04df399278db420f76722c2b14bbee1811ce1bfc8d15;
+        proof[2] = 0xb554f56f3dd0e3f431f90d2d3f1f56a10fcb91ebf0f037b524499c6244787835;
+        uint16 claimScoreBbps = 10000;
+
+        ProfileTokenClaim(tokenClaim).claimTokensWithProof(proof, profileId, claimScoreBbps);
 
         vm.stopBroadcast();
     }
