@@ -18,7 +18,7 @@ const MERKLE_CLAIM_AMOUNT_MAX = 10_000; // 10k bonsai
 /*
 USAGE: put your csv in the root dir and run
 
-npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="testnet_merkle_claim_tree_input.csv" --jsonOutputFile="testnet_merkle_claim_tree_output.json"
+npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_input.csv" --jsonOutputFile="merkle_claim_tree_output.json"
 */
 (async () => {
   const {
