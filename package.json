@@ -7,5 +7,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "yargs": "^17.7.2"
+  },
+  "scripts": {
+    "claim:polygon": "source .env && forge script script/DeployProfileTokenClaim.s.sol:WithdrawUnclaimedTokens --rpc-url polygon -vvvv --skip .t.sol --legacy"
   }
 }

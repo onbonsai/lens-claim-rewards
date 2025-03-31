@@ -6,10 +6,10 @@ import csv from "csv-parser";
 import { keccak256, toBuffer } from "ethereumjs-util";
 import { MerkleTree } from "merkletreejs";
 import { parseUnits, solidityPack } from "ethers/lib/utils";
-import { convertIntToHexLensId } from "./utils";
 
 interface CsvRow {
-  profileId: string;
+  eoa: string;
+  accountAddress: string;
   claimScoreBbps: number;
 }
 
@@ -43,8 +43,8 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
         return keccak256(
           toBuffer(
             solidityPack(
-              ["uint256", "uint16"],
-              [row.profileId, row.claimScoreBbps]
+              ["address", "address", "uint16"],
+              [row.eoa, row.accountAddress, row.claimScoreBbps]
             )
           )
         );
@@ -55,10 +55,10 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
 
       const userData = {};
       csvData.forEach((row, index) => {
-        const profileId = convertIntToHexLensId(row.profileId);
-        userData[profileId] = {
+        userData[row.accountAddress] = {
           proof: tree.getHexProof(leaves[index]),
-          profileId,
+          eoa: row.eoa,
+          accountAddress: row.accountAddress,
           claimScoreBbps: row.claimScoreBbps,
           claimableAmount: parseUnits((MERKLE_CLAIM_AMOUNT_MAX * (row.claimScoreBbps / 10000)).toString(), 18).toString()
         };
