@@ -5,14 +5,15 @@ libs = ['lib']
 gas_reports = []
 optimizer = true
 optimizer_runs = 20000
-solc_version = "0.8.21"
+solc_version = "0.8.26"
 evm_version = "paris"
 via_ir = true
 
 [profile.zksync]
 src = 'src'
 libs = ['lib']
-solc-version = "0.8.21"
+solc-version = "0.8.26"
+evm_version = "cancun"
 fallback_oz = true
 is_system = false
 mode = "3"
