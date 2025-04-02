@@ -16,7 +16,7 @@ ABI can be found at [abi/ProfileClaimToken.json](abi/ProfileClaimToken.json)
 
 | Contract Name | Lens Chain Sepolia Testnet | Lens Chain Mainnet |
 | ------------- | ------------- | ------------- |
-| `AccountTokenClaim`  | `0x310F87946E3664ee574DD73066251851B400Db29` | `` |
+| `AccountTokenClaim`  | `0x88fce9288e22797ee427FfC4EA6FD581113b3cc4` | `` |
 
 ## Setup
 

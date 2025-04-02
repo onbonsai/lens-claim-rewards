@@ -20,7 +20,7 @@ contract DeployAccountTokenClaim is Script {
 
         if (block.chainid == 37111) {
             // 2 claims
-            token = 0x3d2bD0e15829AA5C362a4144FdF4A1112fa29B5c; // bonsai
+            token = 0x795cc31B44834Ff1F72F7db73985f9159Bd51ac2; // bonsai
             merkleRoot = 0x198fe8fe4a853464521cfb5fd0439659cb6b512c2835ee07134ee9a616c548b8;
             merkleClaimTotal = 2_000 ether;
             merkleClaimAmountMax = 1_000 ether;
