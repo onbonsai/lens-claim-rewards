@@ -1,8 +1,8 @@
 {
     "TESTNET": {
-        "ProfileTokenClaim": "0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea"
+        "AccountTokenClaim": "0x3B539f9961A03548164d612dc5f44C70973433F7"
     },
     "MAINNET": {
-        "ProfileTokenClaim": "0xC14b0FBB2059698Cf28Fff318D0C40e24eC07fC8"
+        "AccountTokenClaim": ""
     }
 }

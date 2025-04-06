@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+import { join } from 'path';
+dotenv.config({ path: join(__dirname, '../.env') });
 import { MongoClient } from 'mongodb';
 
 import merkleJson from '../merkle_claim_tree_output.json'
