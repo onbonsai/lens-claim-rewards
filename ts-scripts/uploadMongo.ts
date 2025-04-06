@@ -38,8 +38,8 @@ npx ts-node ./ts-scripts/uploadMongo.ts
                     root: merkleJson.root,
                     eoa: data.eoa,
                     accountAddress,
-                    createdAt: Math.floor(Date.now() / 1000),
-                    proof: data.proof.join(".")
+                    proof: data.proof.join("."),
+                    claimScoreBps: data.claimScoreBbps,
                 }
             }
         }));

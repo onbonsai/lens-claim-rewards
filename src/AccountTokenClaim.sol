@@ -85,16 +85,16 @@ contract AccountTokenClaim is Ownable, IAccountTokenClaim {
         // revert if not account owner
         if (msg.sender != IOwnable(accountAddress).owner()) revert NotAllowed();
 
-        if (claims[accountAddress]) revert AlreadyClaimed();
+        if (claims[msg.sender]) revert AlreadyClaimed();
         if (!MerkleProofLib.verify(
             proof,
             _merkleRoot,
-            keccak256(abi.encodePacked(msg.sender, accountAddress, claimScoreBbps))
+            keccak256(abi.encodePacked(msg.sender, claimScoreBbps))
         )) revert InvalidProof();
 
         uint256 amount = (claimScoreBbps * _merkleClaimAmountMax) / BPS_MAX;
 
-        claims[accountAddress] = true;
+        claims[msg.sender] = true;
         merkleClaimAmountTotal -= amount;
         token.safeTransfer(accountAddress, amount);
 
@@ -104,18 +104,16 @@ contract AccountTokenClaim is Ownable, IAccountTokenClaim {
     /**
      * @notice Returns the amount claimable by the account with the given proof
      * @param proof Merkle proof of the claim
-     * @param accountAddress The Lens Account address to transfer tokens to
      * @param claimScoreBbps Percent of the `_merkleClaimAmountMax` this profile can claim (in bps)
      */
     function claimableAmount(
         bytes32[] calldata proof,
-        address accountAddress,
         uint16 claimScoreBbps
     ) external view returns (uint256) {
-        bool isValid = !claims[accountAddress] && MerkleProofLib.verify(
+        bool isValid = !claims[msg.sender] && MerkleProofLib.verify(
             proof,
             _merkleRoot,
-            keccak256(abi.encodePacked(msg.sender, accountAddress, claimScoreBbps))
+            keccak256(abi.encodePacked(msg.sender, claimScoreBbps))
         );
 
         return isValid

@@ -9,7 +9,6 @@ import { parseUnits, solidityPack } from "ethers/lib/utils";
 
 interface CsvRow {
   eoa: string;
-  accountAddress: string;
   claimScoreBbps: number;
 }
 
@@ -43,8 +42,8 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
         return keccak256(
           toBuffer(
             solidityPack(
-              ["address", "address", "uint16"],
-              [row.eoa, row.accountAddress, row.claimScoreBbps]
+              ["address", "uint16"],
+              [row.eoa, row.claimScoreBbps]
             )
           )
         );
@@ -55,10 +54,9 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
 
       const userData = {};
       csvData.forEach((row, index) => {
-        userData[row.accountAddress] = {
+        userData[row.eoa] = {
           proof: tree.getHexProof(leaves[index]),
           eoa: row.eoa,
-          accountAddress: row.accountAddress,
           claimScoreBbps: row.claimScoreBbps,
           claimableAmount: parseUnits((MERKLE_CLAIM_AMOUNT_MAX * (row.claimScoreBbps / 10000)).toString(), 18).toString()
         };
