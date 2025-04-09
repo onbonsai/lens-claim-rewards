@@ -5,14 +5,13 @@ import * as fs from "fs";
 import csv from "csv-parser";
 import { keccak256, toBuffer } from "ethereumjs-util";
 import { MerkleTree } from "merkletreejs";
-import { parseUnits, solidityPack } from "ethers/lib/utils";
+import { solidityPack } from "ethers/lib/utils";
 
 interface CsvRow {
-  eoa: string;
-  claimScoreBbps: number;
+  address: string;
+  claimScoreBps: number;
+  handle: string;
 }
-
-const MERKLE_CLAIM_AMOUNT_MAX = 10_000; // 10k bonsai
 
 /*
 USAGE: put your csv in the root dir and run
@@ -43,7 +42,7 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
           toBuffer(
             solidityPack(
               ["address", "uint16"],
-              [row.eoa, row.claimScoreBbps]
+              [row.address, row.claimScoreBps]
             )
           )
         );
@@ -54,11 +53,11 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
 
       const userData = {};
       csvData.forEach((row, index) => {
-        userData[row.eoa] = {
+        userData[row.address] = {
           proof: tree.getHexProof(leaves[index]),
-          eoa: row.eoa,
-          claimScoreBbps: row.claimScoreBbps,
-          claimableAmount: parseUnits((MERKLE_CLAIM_AMOUNT_MAX * (row.claimScoreBbps / 10000)).toString(), 18).toString()
+          address: row.address,
+          claimScoreBps: row.claimScoreBps,
+          handle: row.handle,
         };
       });
 
