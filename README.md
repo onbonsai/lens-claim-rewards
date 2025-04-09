@@ -1,6 +1,13 @@
 # lens-claim-rewards
 
-Simple contract to enable token claims on Lens Chain, using merkle proofs.
+Enable token reward claims on Lens Chain, using merkle proofs.
+
+## Overview
+We identify and rank top collectors using Lens v2 data to generate collector graphs, compute EigenTrust scores (via [OpenRank](https://openrank.com/)), and then normalize scores.
+
+In another [repo](https://github.com/onbonsai/lc-airdrop) we compute EigenTrust scores using OpenRank.
+
+This repo formats the list of scores into a merkle tree, to be put onchain on `AccountTokenClaim` contract on [Lens Chain](https://lens.xyz/).
 
 ## Usage
 
@@ -12,26 +19,13 @@ Simple contract to enable token claims on Lens Chain, using merkle proofs.
 
 ## Deployments
 
-ABI can be found at [abi/ProfileClaimToken.json](abi/ProfileClaimToken.json)
+ABI can be found at [abi/AccountTokenClaim.json](abi/AccountTokenClaim.json)
 
 | Contract Name | Lens Chain Sepolia Testnet | Lens Chain Mainnet |
 | ------------- | ------------- | ------------- |
-| `AccountTokenClaim`  | `0x88fce9288e22797ee427FfC4EA6FD581113b3cc4` | `` |
+| `AccountTokenClaim`  | `0x1C94ebD5D6B4242CC6b6163d12FbB215ABe0d902` | `` |
 
 ## Setup
-
-### Deploy the contract
-Set your `.env` by copying `.env.template`
-
-Compile the contracts
-```bash
-FOUNDRY_PROFILE=zksync forge build --zksync
-```
-
-Use `create` with zksync
-```bash
-forge create src/AccountTokenClaim.sol --constructor-args "0x3d2bD0e15829AA5C362a4144FdF4A1112fa29B5c" --account myKeystore --rpc-url https://rpc.testnet.lens.dev --chain 37111 --zksync
-```
 
 ### Create merkle data
 
@@ -42,21 +36,31 @@ npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_in
 
 The root can then be uploaded to the contract - only once - via `#setClaimProof` which also transfers in the token amount.
 
-### Set Merkle Claim Proof
+This is done in the deploy script `DeployAccountTokenClaim.s.sol`
 
-The contract owner can call this function to set the one-off merkle claim
-```solidity
-function setClaimProof(uint256 _merkleClaimAmountTotal, uint256 __merkleClaimAmountMax, bytes32 __merkleRoot) external;
+### Deploy the contract
+Set your `.env` by copying `.env.template`
+
+Compile the contracts
+```bash
+FOUNDRY_PROFILE=zksync forge build --zksync
 ```
 
-First, approve the tokens for the contract
+Deploy via script (make sure you configure the reward amount)
 ```bash
-cast send 0x3d2bD0e15829AA5C362a4144FdF4A1112fa29B5c "approve(address,uint256)" "0x310F87946E3664ee574DD73066251851B400Db29" 100000000000000000000000 --account myKeystore --rpc-url https://rpc.testnet.lens.dev --chain 37111
+forge script script/DeployAccountTokenClaim.s.sol:DeployAccountTokenClaim --rpc-url lens-testnet --skip .t.sol --zksync -vvvvv --slow --broadcast
 ```
 
-Then set the merkle root
+And verify the contract (on LC mainnet)
 ```bash
-cast send 0x310F87946E3664ee574DD73066251851B400Db29 "setClaimProof(uint256,uint256,bytes32)" 2000000000000000000000 1000000000000000000000 "0x198fe8fe4a853464521cfb5fd0439659cb6b512c2835ee07134ee9a616c548b8" --account myKeystore --rpc-url https://rpc.testnet.lens.dev --chain 37111
+forge verify-contract \
+    --zksync \
+    --watch \
+    --verifier zksync  \
+    --verifier-url https://api-explorer-verify.lens.matterhosted.dev/contract_verification \
+    --constructor-args $(cast abi-encode "constructor(address)" 0x795cc31B44834Ff1F72F7db73985f9159Bd51ac2) \
+    0xf73Bdd70dBEbaf053Ed01bA45847aE43dE9cFE4F \
+    src/AccountTokenClaim.sol:AccountTokenClaim
 ```
 
 ### Claim tokens
@@ -78,4 +82,9 @@ function claimableAmount(
 You can check if an account has claimed their one-off via the getter:
 ```solidity
 function claims(address accountAddress) external view returns (bool claimed);
+```
+
+Attempt to claim with a valid proof
+```bash
+forge script script/DeployAccountTokenClaim.s.sol:ClaimTokensWithProof --rpc-url lens-testnet --skip .t.sol --zksync -vvvvv --slow --broadcast
 ```
