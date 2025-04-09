@@ -32,14 +32,13 @@ npx ts-node ./ts-scripts/uploadMongo.ts
         const { client, collection } = await getMongoCollection();
 
         console.log(`merkle leaves: ${Object.keys(merkleJson.userData).length}`);
-        const bulkOps = Object.entries(merkleJson.userData).map(([accountAddress, data]) => ({
+        const bulkOps = Object.entries(merkleJson.userData).map(([address, data]) => ({
             insertOne: {
                 document: {
                     root: merkleJson.root,
-                    eoa: data.eoa,
-                    accountAddress,
+                    address: address.toLowerCase(),
                     proof: data.proof.join("."),
-                    claimScoreBps: data.claimScoreBbps,
+                    claimScoreBps: data.claimScoreBps,
                 }
             }
         }));
