@@ -3,11 +3,13 @@
 Enable token reward claims on Lens Chain, using merkle proofs.
 
 ## Overview
-We identify and rank top collectors using Lens v2 data to generate collector graphs, compute EigenTrust scores (via [OpenRank](https://openrank.com/)), and then normalize scores.
+We first identify and rank top collectors using Lens v2 data to generate collector graphs. Then we compute EigenTrust scores via [OpenRank](https://openrank.com/) before normalizing them.
 
 In another [repo](https://github.com/onbonsai/lc-airdrop) we compute EigenTrust scores using OpenRank.
 
-This repo formats the list of scores into a merkle tree, to be put onchain on `AccountTokenClaim` contract on [Lens Chain](https://lens.xyz/).
+This repo formats the list of scores into a merkle tree, to be put onchain through our `AccountTokenClaim` contract on [Lens Chain](https://lens.xyz/).
+
+A user can submit their proof on the contract and claim tokens to their Lens account.
 
 ## Usage
 
