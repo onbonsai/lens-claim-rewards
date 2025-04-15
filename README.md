@@ -1,79 +1,93 @@
 # lens-claim-rewards
 
-Simple contract to enable token claims. Lens Profiles can claim directly or via the [profile manager](https://docs.lens.xyz/docs/profile-manager). One claim per epoch.
+Enable token reward claims on Lens Chain, using merkle proofs.
+
+## Overview
+We first identify and rank top collectors using Lens v2 data to generate collector graphs. Then we compute EigenTrust scores via [OpenRank](https://openrank.com/) before normalizing them.
+
+In another [repo](https://github.com/onbonsai/lc-airdrop) we compute EigenTrust scores using OpenRank.
+
+This repo formats the list of scores into a merkle tree, to be put onchain through our `AccountTokenClaim` contract on [Lens Chain](https://lens.xyz/).
+
+A user can submit their proof on the contract and claim tokens to their Lens account.
+- View the list for LC $BONSAI airdrop 1 [here](/merkle_claim_tree_input.csv)
 
 ## Usage
 
 1. [install Foundry](https://book.getfoundry.sh/getting-started/installation.html)
+1. [install Foundry zkSync](https://docs.zksync.io/zksync-era/tooling/foundry/overview)
 2. `forge install` to download dependencies
-3. `forge build` to compile contracts
+3. `FOUNDRY_PROFILE=zksync forge build --zksync` to compile contracts
 4. `forge test` to run tests
-
 
 ## Deployments
 
-ABI can be found at [abi/ProfileClaimToken.json](abi/ProfileClaimToken.json)
+ABI can be found at [abi/AccountTokenClaim.json](abi/AccountTokenClaim.json)
 
-| Contract Name | Mumbai | Polygon |
+| Contract Name | Lens Chain Sepolia Testnet | Lens Chain Mainnet |
 | ------------- | ------------- | ------------- |
-| `ProfileTokenClaim`  | `0xB41C763DF745946B3cFd3c8A93cbc9806714D5Ea` | `0xC14b0FBB2059698Cf28Fff318D0C40e24eC07fC8` |
+| `AccountTokenClaim`  | `0x1C94ebD5D6B4242CC6b6163d12FbB215ABe0d902` | `0xDD25E29840daB77Daab42FeEB4174364A89037d1` |
 
-Set your `.env` by copying `.env.template`
+## Setup
 
-### Deploy the contract
-NOTE: This also sets the merkle root for the one-off claiming - see the script for the config
+### Create merkle data
 
-```bash
-source .env && forge script script/DeployProfileTokenClaim.s.sol:DeployProfileTokenClaim --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
-```
-
-### Start a new rewards epoch
-
-The contract owner can call this function to set a new rewards epoch and transfer in the rewards token
-```solidity
-function newEpoch(uint256 startingProfileId, uint256 totalAmount, uint256 profileCount) external;
-```
-
-Run the script:
-```bash
-source .env && forge script script/DeployProfileTokenClaim.s.sol:NewEpoch --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
-```
-
-### Check claimable amount
-```solidity
-function claimableAmount(uint256 profileId) external view returns (uint256);
-```
-
-### Claim tokens
-
-Anyone with a profileId >= the `startingProfileId` for the given `epoch` can claim their rewards - directly or through their Lens Profile Manager.
-```solidity
-function claimTokens(uint256 profileId) external;
-```
-
-Run the script:
-```bash
-source .env && forge script script/DeployProfileTokenClaim.s.sol:ClaimTokens --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
-```
-
-### Claim tokens with proof
-
-We enable a one-off claiming via merkle proofs. Data is to be pre-generated offchain and you can then set a CSV in the root directory (see `merkle_claim_tree_input.csv`) to generate a merkle tree via
+We enable a one-off token claims via merkle proofs. Data is pre-generated offchain; you can then set a CSV in the root directory (see `merkle_claim_tree_input.csv`) to generate a merkle tree via
 ```bash
 npx ts-node ./ts-scripts/merkleClaimTree.ts --csvInputFile="merkle_claim_tree_input.csv" --jsonOutputFile="merkle_claim_tree_output.json"
 ```
 
-The root can then be uploaded to the contract - only once - via `#setClaimProof` and transfering in the token amount. Proof data should be stored in a db, indexed by `profileId` and sent along with the transaction to claim via:
-```solidity
-function claimTokensWithProof(bytes32[] calldata proof, uint256 profileId, uint16 claimScoreBbps) external;
-```
+The root can then be uploaded to the contract - only once - via `#setClaimProof` which also transfers in the token amount.
 
-You can check if a profile has claimed their one-off via the getter:
-```solidity
-function proofClaims(uint256 profileId) external view returns (bool claimed);
-```
+This is done in the deploy script `DeployAccountTokenClaim.s.sol`
 
-Run the script:
+### Deploy the contract
+Set your `.env` by copying `.env.template`
+
+Compile the contracts
 ```bash
-source .env && forge script script/DeployProfileTokenClaim.s.sol:ClaimTokensWithProof --rpc-url $MUMBAI_RPC_URL -vvvv --skip .t.sol --legacy --broadcast
+FOUNDRY_PROFILE=zksync forge build --zksync
+```
+
+Deploy via script (make sure you configure the reward amount)
+```bash
+forge script script/DeployAccountTokenClaim.s.sol:DeployAccountTokenClaim --rpc-url lens-testnet --skip .t.sol --zksync -vvvvv --slow --broadcast
+```
+
+And verify the contract (on LC mainnet)
+```bash
+forge verify-contract \
+    --zksync \
+    --watch \
+    --verifier zksync  \
+    --verifier-url https://api-explorer-verify.lens.matterhosted.dev/contract_verification \
+    --constructor-args $(cast abi-encode "constructor(address)" 0x795cc31B44834Ff1F72F7db73985f9159Bd51ac2) \
+    0xf73Bdd70dBEbaf053Ed01bA45847aE43dE9cFE4F \
+    src/AccountTokenClaim.sol:AccountTokenClaim
+```
+
+### Claim tokens
+
+Proof data should be stored in a db, indexed by `accountAddress` and sent along with the transaction to claim via:
+```solidity
+function claimTokensWithProof(bytes32[] calldata proof, address accountAddress, uint16 claimScoreBbps) external;
+```
+
+You can check the claimable amount of a given `accountAddress`
+```solidity
+function claimableAmount(
+    bytes32[] calldata proof,
+    address accountAddress,
+    uint16 claimScoreBbps
+) external view returns (uint256);
+```
+
+You can check if an account has claimed their one-off via the getter:
+```solidity
+function claims(address accountAddress) external view returns (bool claimed);
+```
+
+Attempt to claim with a valid proof
+```bash
+forge script script/DeployAccountTokenClaim.s.sol:ClaimTokensWithProof --rpc-url lens-testnet --skip .t.sol --zksync -vvvvv --slow --broadcast
 ```

@@ -5,16 +5,21 @@ libs = ['lib']
 gas_reports = []
 optimizer = true
 optimizer_runs = 20000
-solc_version = "0.8.21"
+solc_version = "0.8.26"
 evm_version = "paris"
 via_ir = true
+
+[profile.zksync]
+src = 'src'
+libs = ['lib']
+solc-version = "0.8.26"
+evm_version = "cancun"
+fallback_oz = true
+is_system = false
+mode = "3"
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config
 
 [rpc_endpoints]
-mumbai = "${MUMBAI_RPC_URL}"
-polygon = "${POLYGON_RPC_URL}"
-
-[etherscan]
-polygon = { key = "${POLYGONSCAN_API_KEY}" }
-mumbai = { key = "${POLYGONSCAN_API_KEY}" }
+lens-testnet = "https://rpc.testnet.lens.xyz"
+lens = "https://rpc.lens.xyz"
