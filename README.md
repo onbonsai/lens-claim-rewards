@@ -10,6 +10,7 @@ In another [repo](https://github.com/onbonsai/lc-airdrop) we compute EigenTrust 
 This repo formats the list of scores into a merkle tree, to be put onchain through our `AccountTokenClaim` contract on [Lens Chain](https://lens.xyz/).
 
 A user can submit their proof on the contract and claim tokens to their Lens account.
+- View the list for LC $BONSAI airdrop 1 [here](/merkle_claim_tree_input.csv)
 
 ## Usage
 
@@ -25,7 +26,7 @@ ABI can be found at [abi/AccountTokenClaim.json](abi/AccountTokenClaim.json)
 
 | Contract Name | Lens Chain Sepolia Testnet | Lens Chain Mainnet |
 | ------------- | ------------- | ------------- |
-| `AccountTokenClaim`  | `0x1C94ebD5D6B4242CC6b6163d12FbB215ABe0d902` | `` |
+| `AccountTokenClaim`  | `0x1C94ebD5D6B4242CC6b6163d12FbB215ABe0d902` | `0xDD25E29840daB77Daab42FeEB4174364A89037d1` |
 
 ## Setup
 
