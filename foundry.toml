@@ -21,5 +21,5 @@ mode = "3"
 # See more config options https://github.com/gakonst/foundry/tree/master/config
 
 [rpc_endpoints]
-lens-testnet = "https://rpc.testnet.lens.dev"
-lens = "https://rpc.lens.dev"
+lens-testnet = "https://rpc.testnet.lens.xyz"
+lens = "https://rpc.lens.xyz"
